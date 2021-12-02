@@ -1,1 +1,2 @@
-{:deps {org.clojure/clojure {:mvn/version "1.11.0-alpha3"}}}
+{:deps {org.clojure/clojure {:mvn/version "1.11.0-alpha3"}
+        net.cgrand/xforms {:mvn/version "0.19.2"}}}
