@@ -3,13 +3,8 @@
             [net.cgrand.xforms :as xfs]
             [net.cgrand.xforms.rfs :as rfs]))
 
-(defn parse-input [s]
-  (->> (str/split-lines s)
-       (map (partial map str))
-       (map (partial mapv parse-long))))
-
 (def ex
-  (parse-input
+  (str/split-lines
    "00100
 11110
 10110
@@ -24,7 +19,7 @@
 01010"))
 
 (def input
-  (parse-input (slurp "inputs/day3.txt")))
+  (str/split-lines (slurp "inputs/day3.txt")))
 
 (defn update-freqs [freqs number]
   (mapv (fn [fs n]
