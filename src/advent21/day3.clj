@@ -32,15 +32,14 @@
         (concat freqs (repeat {}))
         number))
 
-(def freqs-xf
-  (fn [rf]
-    (let [*freqs (volatile! [])]
-      (fn
-        ([] (rf))
-        ([res] (-> res (rf @*freqs) unreduced rf))
-        ([res x]
-         (vswap! *freqs update-freqs x)
-         res)))))
+(defn freqs-xf [rf]
+  (let [*freqs (volatile! [])]
+    (fn
+      ([] (rf))
+      ([res] (-> res (rf @*freqs) unreduced rf))
+      ([res x]
+       (vswap! *freqs update-freqs x)
+       res))))
 
 (defn number-freqs [input]
   (transduce freqs-xf rfs/last input))
