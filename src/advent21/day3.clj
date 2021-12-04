@@ -1,10 +1,14 @@
 (ns advent21.day3
   (:require [clojure.string :as str]
             [net.cgrand.xforms :as xfs]
-            [net.cgrand.xforms.rfs :as rfs]))
+            [net.cgrand.xforms.rfs :as rfs]
+            [medley.core :as medley]))
+
+(defn parse-input [s]
+  (->> (str/split-lines s) (map vec)))
 
 (def ex
-  (str/split-lines
+  (parse-input
    "00100
 11110
 10110
@@ -19,7 +23,7 @@
 01010"))
 
 (def input
-  (str/split-lines (slurp "inputs/day3.txt")))
+  (parse-input (slurp "inputs/day3.txt")))
 
 (defn update-freqs [freqs number]
   (mapv (fn [fs n]
@@ -59,8 +63,34 @@
     (* (bin->dec (gamma freqs))
        (bin->dec (epsilon freqs)))))
 
+
+(defn transpose [coll]
+  (apply mapv vector coll))
+
+(defn oxygen [{ones \1, zeroes \0}]
+  (cond (= ones zeroes) \1, (< ones zeroes) \0, (> ones zeroes) \1))
+
+(defn co2 [{ones \1, zeroes \0}]
+  (cond (= ones zeroes) \0, (< ones zeroes) \1, (> ones zeroes) \0))
+
+(defn rating [f input]
+  (reduce (fn [remaining idx]
+            (if (= 1 (count remaining))
+              (reduced (first remaining))
+              (let [{col idx} (transpose remaining)
+                    choice (f (merge {\1 0, \0 0} (frequencies col)))]
+                (filter #(= choice (% idx)) remaining))))
+          input
+          (range)))
+
+(defn answer2 [input]
+  (* (bin->dec (rating oxygen input))
+     (bin->dec (rating co2 input))))
+
 (comment
   (= 198 (answer1 ex))
+  (= 230 (answer2 ex))
 
   (answer1 input)
+  (answer2 input)
   )
