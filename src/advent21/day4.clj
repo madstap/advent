@@ -75,8 +75,30 @@
           (map unmarked boards)
           numbers))
 
+(defn answer2 [{:keys [numbers boards]}]
+  (reduce (fn [{:keys [bs loser-idx] :as acc} n]
+            (let [new-bs (map #(mark % n) bs)]
+              (cond
+                (every? win? new-bs)
+                (let [loser (nth new-bs loser-idx)]
+                  (reduced (score loser n)))
+
+                (and (nil? loser-idx)
+                     (= 1 (count (remove win? new-bs))))
+                (let [loser-idx (some (fn [[idx b]]
+                                        (and (not (win? b)) idx))
+                                      (medley/indexed new-bs))]
+                  (assoc acc :bs new-bs :loser-idx loser-idx))
+
+                :else (assoc acc :bs new-bs))))
+          {:bs (mapv unmarked boards)
+           :loser-idx nil}
+          numbers))
+
 (comment
   (= 4512 (answer1 ex))
+  (= 1924 (answer2 ex))
 
   (answer1 input)
+  (time (answer2 input))
   )
