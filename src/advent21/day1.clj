@@ -3,7 +3,7 @@
             [net.cgrand.xforms :as xfs]))
 
 (def input
-  (map parse-long (str/split-lines (slurp "inputs/day1-0.txt"))))
+  (map parse-long (str/split-lines (slurp "inputs/day1.txt"))))
 
 (defn partition-xf
   ([n] (partition-xf n n))
