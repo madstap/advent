@@ -68,9 +68,7 @@
      (update expanded-x x into (repeat missing-y 0)))))
 
 (defn mark-vent [ocean-floor coords]
-  (-> ocean-floor
-      (expand-ocean-floor coords)
-      (update-in coords (fnil inc 0))))
+  (-> ocean-floor (expand-ocean-floor coords) (update-in coords inc)))
 
 (defn answer1-ocean-floor [input]
   (transduce (comp (remove diagonal?) (mapcat line->coords))
