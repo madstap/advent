@@ -28,12 +28,14 @@
 (defn diagonal? [[[start-x start-y] [end-x end-y]]]
   (not (or (= start-x end-x) (= start-y end-y))))
 
-(defn line->coords [[[start-x start-y] [end-x end-y]]]
-  (for [x (cond->> (range (min start-x end-x) (inc (max start-x end-x)))
-            (> start-x end-x) reverse)
-        y (cond->> (range (min start-y end-y) (inc (max start-y end-y)))
-            (> start-y end-y) reverse)]
-    [x y]))
+(defn line->coords [[[start-x start-y] [end-x end-y] :as line]]
+  (if (diagonal? line)
+    () ;; TODO:
+    (for [x (cond->> (range (min start-x end-x) (inc (max start-x end-x)))
+              (> start-x end-x) reverse)
+          y (cond->> (range (min start-y end-y) (inc (max start-y end-y)))
+              (> start-y end-y) reverse)]
+      [x y])))
 
 (comment
   (= [[1 1] [1 2] [1 3]]
@@ -41,6 +43,13 @@
 
   (= [[9 7] [8 7] [7 7]]
      (line->coords [[9 7] [7 7]]))
+
+  (= [[1 1] [2 2] [3 3]]
+     (line->coords [[1 1] [3 3]]))
+
+  (= [[9 7] [8 8] [7 9]]
+     (line->coords [[9 7] [7 9]]))
+
   )
 
 (defn expand-ocean-floor
@@ -69,9 +78,17 @@
              []
              input))
 
+(defn vent-risk-count [ocean-floor]
+  (xfs/count (comp (mapcat seq) (filter #(< 1 %))) ocean-floor))
+
 (defn answer1 [input]
-  (xfs/count (comp (mapcat seq) (filter #(< 1 %)))
-             (answer1-ocean-floor input)))
+  (vent-risk-count (answer1-ocean-floor input)))
+
+(defn answer2-ocean-floor [input]
+  (transduce (mapcat line->coords) (completing mark-vent) [] input))
+
+(defn answer2 [input]
+  (vent-risk-count (answer2-ocean-floor input)))
 
 (defn transpose [coll]
   (apply mapv vector coll))
@@ -110,6 +127,10 @@
 ;; clojure -X advent21.day5/animate1 :in :ex
 (defn animate1 [{:keys [in] :or {in :ex}}]
   (animate (remove diagonal? (in {:input input :ex ex}))))
+
+;; clojure -X advent21.day5/animate2 :in :ex
+(defn animate2 [{:keys [in] :or {in :ex}}]
+  (animate (in {:input input :ex ex})))
 
 (comment
 
