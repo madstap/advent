@@ -43,11 +43,19 @@
      (line->coords [[9 7] [7 7]]))
   )
 
-(defn expand-ocean-floor [ocean-floor [x y]]
-  (let [missing-x (- (inc x) (count ocean-floor))
-        expanded-x (vec (concat ocean-floor (repeat missing-x [])))
-        missing-y (- (inc y) (count (get expanded-x x)))]
-    (update expanded-x x #(vec (concat % (repeat missing-y 0))))))
+(defn expand-ocean-floor
+  ([ocean-floor]
+   (let [width (or (some->> ocean-floor (map count) not-empty (apply max))
+                   0)]
+     (reduce (fn [o idx]
+               (update o idx #(vec (concat % (repeat (- width (count %)) 0)))))
+             ocean-floor
+             (range (count ocean-floor)))))
+  ([ocean-floor [x y]]
+   (let [missing-x (- (inc x) (count ocean-floor))
+         expanded-x (vec (concat ocean-floor (repeat missing-x [])))
+         missing-y (- (inc y) (count (get expanded-x x)))]
+     (update expanded-x x #(vec (concat % (repeat missing-y 0)))))))
 
 (defn mark-vent [ocean-floor coords]
   (-> ocean-floor
@@ -64,25 +72,20 @@
   (xfs/count (comp (mapcat seq) (filter #(< 1 %)))
              (answer1-ocean-floor input)))
 
+(defn transpose [coll]
+  (apply mapv vector coll))
+
 (defn render-ocean-floor [ocean-floor]
   (let [width (or (some->> ocean-floor (map count) not-empty (apply max))
                   0)]
     (->> ocean-floor
+         expand-ocean-floor
+         transpose
          (map (fn [row]
-                (->> (concat row (repeat 0))
-                     (take width)
+                (->> row
                      (map #(if (zero? %) "." %))
                      (apply str))))
          (str/join "\n"))))
-
-(defn render-ocean-floor [ocean-floor]
-  (->> ocean-floor
-       (map (fn [row]
-              (->> (concat row (repeat 0))
-                   (take width)
-                   (map #(if (zero? %) "." %))
-                   (apply str))))
-       (str/join "\n")))
 
 (defn clean-console []
   (print "\033[H\033[2J")
@@ -90,7 +93,20 @@
 
 (comment
 
-  (println (render-ocean-floor (answer1 ex)))
+  (println (render-ocean-floor (answer1-ocean-floor ex)))
+
+  (=
+   ".......1..
+..1....1..
+..1....1..
+.......1..
+.112111211
+..........
+..........
+..........
+..........
+222111...."
+     (render-ocean-floor (answer1-ocean-floor ex)))
 
   (= 5 (answer1 ex))
 
