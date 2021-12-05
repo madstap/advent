@@ -57,15 +57,15 @@
    (let [width (or (some->> ocean-floor (map count) not-empty (apply max))
                    0)]
      (reduce (fn [o idx]
-               (update o idx #(vec (concat % (repeat (- width (count %)) 0)))))
+               (update o idx #(into % (repeat (- width (count %)) 0))))
              ocean-floor
              (range (count ocean-floor)))))
 
   ([ocean-floor [x y]]
    (let [missing-x (- (inc x) (count ocean-floor))
-         expanded-x (vec (concat ocean-floor (repeat missing-x [])))
+         expanded-x (into ocean-floor (repeat missing-x []))
          missing-y (- (inc y) (count (get expanded-x x)))]
-     (update expanded-x x #(vec (concat % (repeat missing-y 0)))))))
+     (update expanded-x x into (repeat missing-y 0)))))
 
 (defn mark-vent [ocean-floor coords]
   (-> ocean-floor
@@ -150,5 +150,6 @@
   (= 5 (answer1 ex))
 
   "Elapsed time: 8444.524804 msecs"
-  (time (answer1 input))
+  "Elapsed time: 267.005436 msecs"
+  (= 6841 (time (answer1 input)))
   )
