@@ -51,6 +51,7 @@
                (update o idx #(vec (concat % (repeat (- width (count %)) 0)))))
              ocean-floor
              (range (count ocean-floor)))))
+
   ([ocean-floor [x y]]
    (let [missing-x (- (inc x) (count ocean-floor))
          expanded-x (vec (concat ocean-floor (repeat missing-x [])))
@@ -82,18 +83,35 @@
          expand-ocean-floor
          transpose
          (map (fn [row]
-                (->> row
-                     (map #(if (zero? %) "." %))
-                     (apply str))))
+                (->> row (map #(if (zero? %) "." %)) str/join)))
          (str/join "\n"))))
 
 (defn clean-console []
   (print "\033[H\033[2J")
   (flush))
 
-(comment
+(defn print-floor [ocean-floor]
+  (clean-console)
+  (println (render-ocean-floor ocean-floor))
+  (flush))
 
-  (println (render-ocean-floor (answer1-ocean-floor ex)))
+(defn animate [lines]
+  (reduce (fn [o line]
+            (Thread/sleep 300)
+            (reduce (fn [o coords]
+                      (Thread/sleep 150)
+                      (doto (mark-vent o coords)
+                        print-floor))
+                    o
+                    (line->coords line)))
+          []
+          lines))
+
+;; clojure -X advent21.day5/animate1 :in :ex
+(defn animate1 [{:keys [in] :or {in :ex}}]
+  (animate (remove diagonal? (in {:input input :ex ex}))))
+
+(comment
 
   (=
    ".......1..
