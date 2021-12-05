@@ -29,13 +29,13 @@
   (not (or (= start-x end-x) (= start-y end-y))))
 
 (defn line->coords [[[start-x start-y] [end-x end-y] :as line]]
-  (if (diagonal? line)
-    () ;; TODO:
-    (for [x (cond->> (range (min start-x end-x) (inc (max start-x end-x)))
-              (> start-x end-x) reverse)
-          y (cond->> (range (min start-y end-y) (inc (max start-y end-y)))
-              (> start-y end-y) reverse)]
-      [x y])))
+  (let [xs (cond->> (range (min start-x end-x) (inc (max start-x end-x)))
+             (> start-x end-x) reverse)
+        ys (cond->> (range (min start-y end-y) (inc (max start-y end-y)))
+             (> start-y end-y) reverse)]
+    (if (diagonal? line)
+      (map vector xs ys)
+      (for [x xs, y ys] [x y]))))
 
 (comment
   (= [[1 1] [1 2] [1 3]]
@@ -49,7 +49,6 @@
 
   (= [[9 7] [8 8] [7 9]]
      (line->coords [[9 7] [7 9]]))
-
   )
 
 (defn expand-ocean-floor
@@ -146,8 +145,11 @@
      (render-ocean-floor (answer1-ocean-floor ex)))
 
   (= 5 (answer1 ex))
+  (= 12 (answer2 ex))
 
   "Elapsed time: 8444.524804 msecs"
   "Elapsed time: 267.005436 msecs"
   (= 6841 (time (answer1 input)))
+
+  (= 19258 (time (answer2 input)))
   )
