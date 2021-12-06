@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (defn parse-input [s]
-  (->> (re-seq #"\d+" s) (map parse-long)))
+  (->> (re-seq #"\d+" s) (map parse-long) frequencies))
 
 (def input
   (parse-input (slurp "inputs/day6.txt")))
@@ -10,34 +10,32 @@
 (def ex
   (parse-input "3,4,3,1,2"))
 
-(defn fish-next-day [fish]
-  (if (zero? fish)
-    [6 8]
-    [(dec fish)]))
+(defn decrement-age [fish-pop]
+  (->> (range 8)
+       (map (juxt identity #(get fish-pop (inc %) 0)))
+       (into {})))
 
-(defn fish-population-next-day [fish-pop]
-  (mapcat fish-next-day fish-pop))
+(defn fish-population-next-day [{spawning 0, :as fish-pop}]
+  (-> (decrement-age fish-pop)
+      (update 6 (fnil + 0) (or spawning 0))
+      (assoc 8 (or spawning 0))))
 
 (defn fish-population-days [fish-pop]
   (iterate fish-population-next-day fish-pop))
 
+(defn total-pop [fish-pop]
+  (apply + (vals fish-pop)))
+
 (defn answer1 [input]
-  (-> (fish-population-days input) (nth 80) count))
+  (-> (fish-population-days input) (nth 80) total-pop))
 
 (defn answer2 [input]
-  (-> (fish-population-days input) (nth 256) count))
+  (-> (fish-population-days input) (nth 256) total-pop))
 
 (comment
-
-
   (= 5934 (answer1 ex))
-
-  ;; Hangs forever, which makes sense since it's eventually gonna try to make
-  ;; a sequence with 26 billion numbers
   (= 26984457539  (answer2 ex))
 
-
-  "Elapsed time: 1558.196777 msecs"
-  (time (answer1 input))
-
+  (= 379114 (answer1 input))
+  (= 1702631502303 (answer2 input))
   )
