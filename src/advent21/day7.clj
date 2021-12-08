@@ -22,12 +22,6 @@
 (defn total-cost2 [subs goal-pos]
   (transduce (map #(cost2 % goal-pos)) + subs))
 
-(defn all-costs2 [input]
-  (reduce (fn [acc goal-pos]
-            (assoc acc goal-pos (total-cost2 input goal-pos)))
-          {}
-          (range (apply max input))))
-
 (defn avg [xs]
   (/ (apply + xs) (count xs)))
 
@@ -41,11 +35,10 @@
   (total-cost input (median input)))
 
 (defn answer2 [input]
-  (val (apply min-key val (all-costs2 input))))
+  (min (total-cost2 input (math/ceil (avg input)))
+       (total-cost2 input (math/floor (avg input)))))
 
 (comment
-
-  (total-cost2 input (median input))
 
   (= 37 (answer1 ex))
   (= 168 (answer2 ex))
@@ -55,6 +48,6 @@
   (= 328187 (time (answer1 input)))
 
   "Elapsed time: 19865.854694 msecs"
+  "Elapsed time: 25.577696 msecs"
   (= 91257582 (time (answer2 input)))
-
   )
